@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # actions/checkout runs as a different uid than the container user, so
       # git refuses to touch the tree without this.
@@ -105,7 +105,7 @@ jobs:
       # holds the exact diff, which the console output truncates.
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: colcon-test-results
           path: |
