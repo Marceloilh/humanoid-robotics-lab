@@ -1,0 +1,115 @@
+# Continuous integration for the ROS 2 workspace.
+#
+# The point of this workflow is not the green badge. It is to prove that the
+# code builds and passes lint on a machine that is not yours: no stale
+# install/ directory, no package you apt-installed months ago and forgot,
+# no environment variable set in your .bashrc. "Works on my machine" is the
+# single most expensive sentence in robotics.
+#
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '02_trilha_a_ros2/ros2_ws/**'
+      - '05_portfolio/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+  # Weekly run against a freshly pulled ros:jazzy image. This is what catches
+  # an upstream regression *before* you hit it mid-study, on a day when you
+  # changed nothing and the build suddenly breaks.
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+# A new push supersedes the run still in flight for the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: colcon build + test (Jazzy)
+    runs-on: ubuntu-24.04
+
+    # The official ROS image pins the exact distro the project targets.
+    # Installing ROS 2 onto a bare runner would take minutes and could drift
+    # from what runs in WSL.
+    container:
+      image: ros:jazzy-ros-base
+
+    env:
+      WS: 02_trilha_a_ros2/ros2_ws
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # actions/checkout runs as a different uid than the container user, so
+      # git refuses to touch the tree without this.
+      - name: Mark the workspace as a safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install build tooling
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            python3-colcon-common-extensions \
+            python3-rosdep \
+            build-essential \
+            cmake
+
+      # rosdep reads every package.xml and installs the declared dependencies.
+      # If a build fails here, the real defect is a missing <depend> tag — the
+      # dependency exists on your machine but was never declared.
+      - name: Resolve package dependencies with rosdep
+        run: |
+          rosdep init 2>/dev/null || true
+          rosdep update --rosdistro jazzy
+          . /opt/ros/jazzy/setup.sh
+          rosdep install --from-paths "$WS/src" --ignore-src -y --rosdistro jazzy
+
+      # Warnings are promoted to errors on purpose. A warning you keep seeing
+      # is a warning you stop reading, and in C++ the ignored one is usually
+      # the uninitialised member that bites you at 1 kHz.
+      - name: Build
+        run: |
+          . /opt/ros/jazzy/setup.sh
+          cd "$WS"
+          colcon build \
+            --event-handlers console_direct+ \
+            --cmake-args \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+
+      # Runs unit tests plus the ament linters (uncrustify, cppcheck,
+      # lint_cmake, xmllint). colcon test always exits 0 — test-result is what
+      # actually fails the job, so both commands are required.
+      - name: Test
+        run: |
+          . /opt/ros/jazzy/setup.sh
+          cd "$WS"
+          colcon test --event-handlers console_direct+ --return-code-on-test-failure
+
+      - name: Report test results
+        if: always()
+        run: |
+          . /opt/ros/jazzy/setup.sh
+          cd "$WS"
+          colcon test-result --verbose
+
+      # Kept only on failure: when the linter disagrees with you, the xunit XML
+      # holds the exact diff, which the console output truncates.
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: colcon-test-results
+          path: |
+            ${{ env.WS }}/build/**/test_results/**
+            ${{ env.WS }}/log/latest_test/**
+          retention-days: 14
+          if-no-files-found: ignore

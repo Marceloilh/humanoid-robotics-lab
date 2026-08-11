@@ -1,5 +1,6 @@
 # humanoid-robotics-lab
 
+[![CI](https://github.com/Marceloilh/humanoid-robotics-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Marceloilh/humanoid-robotics-lab/actions/workflows/ci.yml)
 [![ROS 2](https://img.shields.io/badge/ROS%202-Jazzy%20Jalisco-22314E?logo=ros&logoColor=white)](https://docs.ros.org/en/jazzy/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-E95420?logo=ubuntu&logoColor=white)](https://releases.ubuntu.com/24.04/)
 [![C++](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus&logoColor=white)](https://en.cppreference.com/w/cpp/20)
@@ -240,6 +241,12 @@ colcon test --event-handlers console_direct+ && colcon test-result --verbose
 `--symlink-install` is not cosmetic: it makes Python nodes and config files
 editable without a rebuild, which is the difference between a two-second and a
 ninety-second iteration loop.
+
+**CI.** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the same two
+commands inside a clean `ros:jazzy-ros-base` container on every push, with
+`-DCMAKE_COMPILE_WARNING_AS_ERROR=ON` and the ament linters enabled. It also
+runs weekly against a freshly pulled image, which is what surfaces an upstream
+regression on a day when nothing local changed.
 
 ---
 
