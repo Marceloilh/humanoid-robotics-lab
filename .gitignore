@@ -113,10 +113,12 @@ htmlcov/
 *.db3-wal
 *.mcap
 rosbag2_*/
-06_dados/rosbags/
 
 # --- Datasets and trained models -------------------------------------------
-06_dados/
+# No trailing slash on purpose: these paths are symlinks to external storage
+# (/mnt/i), and a `dir/` pattern does not match a symlink — git would happily
+# commit the link itself, which is useless to a cloner and leaks local paths.
+06_dados
 *.npy
 *.npz
 *.h5
@@ -143,11 +145,11 @@ mlruns/
 lightning_logs/
 tensorboard/
 events.out.tfevents.*
-03_trilha_c_sim/treinos/
+03_trilha_c_sim/treinos
 
 # --- Simulation output ------------------------------------------------------
 # MuJoCo scenes (.xml/.mjcf) ARE versioned; renders and captures are not.
-03_trilha_c_sim/videos/
+03_trilha_c_sim/videos
 *.mp4
 *.mkv
 *.avi
@@ -166,11 +168,11 @@ cyclictest_*.txt
 # --- Portfolio media --------------------------------------------------------
 # Heavy source media stays out; small optimised assets used by the READMEs
 # live in docs/assets/ and are whitelisted below.
-05_portfolio/midia/
+05_portfolio/midia
 !docs/assets/**
 
 # --- Local backups ----------------------------------------------------------
-90_backup_repo/
+90_backup_repo
 *.bak
 *.orig
 *.rej
@@ -179,9 +181,9 @@ cyclictest_*.txt
 
 # --- Personal / career material (NEVER publish) ----------------------------
 # CVs, job applications and private notes about companies.
-07_carreira/
-**/curriculo/
-**/candidaturas/
+07_carreira
+**/curriculo
+**/candidaturas
 *.cv.pdf
 
 # --- Secrets ----------------------------------------------------------------
