@@ -1,0 +1,40 @@
+# Normalise line endings: the repo is authored in WSL but browsed from Windows.
+* text=auto eol=lf
+
+*.sh          text eol=lf
+*.bash        text eol=lf
+*.py          text eol=lf
+*.cpp         text eol=lf
+*.hpp         text eol=lf
+*.c           text eol=lf
+*.h           text eol=lf
+*.cmake       text eol=lf
+CMakeLists.txt text eol=lf
+*.xml         text eol=lf
+*.urdf        text eol=lf
+*.xacro       text eol=lf
+*.sdf         text eol=lf
+*.mjcf        text eol=lf
+*.yaml        text eol=lf
+*.yml         text eol=lf
+*.md          text eol=lf
+
+# Binary assets — never diff or convert.
+*.png         binary
+*.jpg         binary
+*.gif         binary
+*.mp4         binary
+*.stl         binary
+*.dae         binary
+*.obj         binary
+*.pt          binary
+*.onnx        binary
+*.db3         binary
+*.mcap        binary
+
+# Keep GitHub's language stats honest: robot descriptions and generated
+# artefacts should not dominate the bar.
+*.urdf        linguist-language=XML
+*.xacro       linguist-language=XML
+*.mjcf        linguist-language=XML
+docs/**       linguist-documentation

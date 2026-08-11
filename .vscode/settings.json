@@ -1,0 +1,28 @@
+{
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy",
+    "--header-insertion=never",
+    "--completion-style=detailed",
+    "--pch-storage=memory",
+    "-j=4"
+  ],
+  "cmake.configureArgs": [
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+  ],
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.urdf": "xml",
+    "*.xacro": "xml",
+    "*.sdf": "xml",
+    "*.mjcf": "xml"
+  },
+  "ROS2.distro": "jazzy",
+  "python.autoComplete.extraPaths": [
+    "/opt/ros/jazzy/lib/python3.12/site-packages"
+  ],
+  "python.analysis.extraPaths": [
+    "/opt/ros/jazzy/lib/python3.12/site-packages"
+  ]
+}
